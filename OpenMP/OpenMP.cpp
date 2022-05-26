@@ -10,7 +10,7 @@
 #include "lodepng.h"
 //#include <CL/cl.hpp>
 
-#define __CL_ENABLE_EXCEPTIONS
+//#define __CL_ENABLE_EXCEPTIONS
 
 std::string readFileToString(std::string fileName) {
     std::string file_content;
