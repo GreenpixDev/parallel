@@ -186,86 +186,6 @@ void openmpVectorizationAdd(
     std::cout << "OpenMP Vectorization Add: " << (endTimestamp - beginTimestamp) * 1000 << " ms" << std::endl;
 }
 
-void sequentialSub(
-    std::vector<unsigned char>& inputImage1,
-    std::vector<unsigned char>& inputImage2,
-    std::vector<unsigned char>& outputImage
-) {
-    outputImage.clear();
-    outputImage.resize(inputImage1.size());
-
-    long double beginTimestamp = omp_get_wtime();
-    for (int i = 0; i < (int)inputImage1.size(); i++) {
-        outputImage[i] = std::min(255, inputImage1[i] - inputImage2[i] + 256);
-    }
-    long double endTimestamp = omp_get_wtime();
-
-    std::cout << "Sequential Sub: " << (endTimestamp - beginTimestamp) * 1000 << " ms" << std::endl;
-}
-
-void openmpSub(
-    std::vector<unsigned char>& inputImage1,
-    std::vector<unsigned char>& inputImage2,
-    std::vector<unsigned char>& outputImage
-) {
-    outputImage.clear();
-    outputImage.resize(inputImage1.size());
-
-    long double beginTimestamp = omp_get_wtime();
-#pragma omp parallel for
-    for (int i = 0; i < (int)inputImage1.size(); i++) {
-        outputImage[i] = std::min(255, inputImage1[i] - inputImage2[i] + 256);
-    }
-    long double endTimestamp = omp_get_wtime();
-
-    std::cout << "OpenMP Sub: " << (endTimestamp - beginTimestamp) * 1000 << " ms" << std::endl;
-}
-
-void sequentialVectorizationSub(
-    std::vector<unsigned char>& inputImage1,
-    std::vector<unsigned char>& inputImage2,
-    std::vector<unsigned char>& outputImage
-) {
-    outputImage.clear();
-    outputImage.resize(inputImage1.size());
-
-    long double beginTimestamp = omp_get_wtime();
-    for (int i = 0; i < (int)inputImage1.size() - 16; i += 16) {
-        __m128i part1 = _mm_loadu_si128((__m128i*) & inputImage1[i]);
-        __m128i part2 = _mm_loadu_si128((__m128i*) & inputImage2[i]);
-
-        __m128i result = _mm_subs_epu8(part1, part2);
-
-        _mm_storeu_si128((__m128i*) & outputImage[i], result);
-    }
-    long double endTimestamp = omp_get_wtime();
-
-    std::cout << "Sequential Vectorization Sub: " << (endTimestamp - beginTimestamp) * 1000 << " ms" << std::endl;
-}
-
-void openmpVectorizationSub(
-    std::vector<unsigned char>& inputImage1,
-    std::vector<unsigned char>& inputImage2,
-    std::vector<unsigned char>& outputImage
-) {
-    outputImage.clear();
-    outputImage.resize(inputImage1.size());
-
-    long double beginTimestamp = omp_get_wtime();
-#pragma omp parallel for
-    for (int i = 0; i < (int)inputImage1.size() - 16; i += 16) {
-        __m128i part1 = _mm_loadu_si128((__m128i*) & inputImage1[i]);
-        __m128i part2 = _mm_loadu_si128((__m128i*) & inputImage2[i]);
-
-        __m128i result = _mm_subs_epu8(part1, part2);
-
-        _mm_storeu_si128((__m128i*) & outputImage[i], result);
-    }
-    long double endTimestamp = omp_get_wtime();
-
-    std::cout << "OpenMP Vectorization Sub: " << (endTimestamp - beginTimestamp) * 1000 << " ms" << std::endl;
-}
-
 const unsigned width = 2400;
 const unsigned height = 2400;
 
@@ -297,21 +217,5 @@ int main() {
 
     outputFilename = "output/openmp vectorization add.png";
     openmpVectorizationAdd(image1, image2, outputImage);
-    writeImage(outputImage, outputFilename, width, height);
-
-    outputFilename = "output/sequential sub.png";
-    sequentialSub(image1, image2, outputImage);
-    writeImage(outputImage, outputFilename, width, height);
-
-    outputFilename = "output/openmp sub.png";
-    openmpSub(image1, image2, outputImage);
-    writeImage(outputImage, outputFilename, width, height);
-
-    outputFilename = "output/sequential vectorization sub.png";
-    sequentialVectorizationSub(image1, image2, outputImage);
-    writeImage(outputImage, outputFilename, width, height);
-
-    outputFilename = "output/openmp vectorization sub.png";
-    openmpVectorizationSub(image1, image2, outputImage);
     writeImage(outputImage, outputFilename, width, height);
 }
